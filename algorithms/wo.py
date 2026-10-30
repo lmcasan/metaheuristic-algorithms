@@ -1,7 +1,7 @@
 import numpy as np
 from utils.methods import _halton_sequence, _levy_flight
 
-def WOSolver(lb, ub, fn_obj, num_walruses=10, T=50, dim=2, seed=None):
+def WOSolver(lb, ub, fn_obj, num_walruses=10, T=50, dim=2, seed=None, return_history=False):
     lb = np.broadcast_to(lb, (dim,)).astype(float).copy()
     ub = np.broadcast_to(ub, (dim,)).astype(float).copy()
 
@@ -32,6 +32,12 @@ def WOSolver(lb, ub, fn_obj, num_walruses=10, T=50, dim=2, seed=None):
     best_index = np.argmin(values)
     best_pos = pos[best_index].copy()
     best_value = values[best_index]
+
+    if return_history:
+        position_history = [pos.copy()]
+        trajectory = [pos[0].copy()]
+        average_fitness = [float(np.mean(values))]
+        convergence = [float(best_value)]
 
     for t in range(T):
         # Variable initialization
@@ -128,8 +134,25 @@ def WOSolver(lb, ub, fn_obj, num_walruses=10, T=50, dim=2, seed=None):
             best_pos = pos[current_best].copy()
             best_value = values[current_best]
 
-    return {
+        # Save value's history
+        if return_history:
+            position_history.append(pos.copy())
+            trajectory.append(pos[0].copy())
+            average_fitness.append(float(np.mean(values)))
+            convergence.append(float(best_value))
+    
+    result  = {
         "best position": best_pos,
         "best value": best_value,
     }
+
+    if return_history:
+        result.update({
+            "history": np.asarray(position_history),
+            "trajectory": np.asarray(trajectory),
+            "average_fitness": np.asarray(average_fitness),
+            "convergence": np.asarray(convergence),
+        })
+    
+    return result
 
