@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def POSSolver(lb, ub, fn_obj, num_particles=5, iterations=10, c1=2.0, c2=2.0, dim=2, w_start=0.9, w_end=0.4):
+def POSSolver(lb, ub, fn_obj, num_particles=5, iterations=10, c1=2.0, c2=2.0, dim=2, w_start=0.9, w_end=0.4, seed = 0.1):
     # Assignment of values
     c1 = c1
     c2 = c2
