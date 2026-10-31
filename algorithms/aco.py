@@ -13,11 +13,8 @@ def ACOSolver(
     dim=2,
     seed=None,
 ):
-    lb = np.broadcast_to(lb, (dim,)).astype(float).copy()
-    ub = np.broadcast_to(ub, (dim,)).astype(float).copy()
-
-    if np.any(lb >= ub):
-        raise ValueError("Each lower bound must be smaller than its upper bound")
+    if dim < 1:
+        raise ValueError("dim must be at least 1")
     if num_ants < 1:
         raise ValueError("num_ants must be at least 1")
     if archive_size < 2:
@@ -28,6 +25,13 @@ def ACOSolver(
         raise ValueError("q must be greater than 0")
     if xi <= 0.0:
         raise ValueError("xi must be greater than 0")
+
+    lb = np.broadcast_to(np.asarray(lb, dtype=float), (dim,)).copy()
+    ub = np.broadcast_to(np.asarray(ub, dtype=float), (dim,)).copy()
+    if not np.all(np.isfinite(lb)) or not np.all(np.isfinite(ub)):
+        raise ValueError("Bounds must be finite")
+    if np.any(lb >= ub):
+        raise ValueError("Each lower bound must be smaller than its upper bound")
 
     rng = np.random.default_rng(seed)
     archive = rng.uniform(lb, ub, size=(archive_size, dim))
@@ -52,7 +56,6 @@ def ACOSolver(
         sigma = xi * spread / (archive_size - 1)
         sigma = np.maximum(sigma, 1e-12 * (ub - lb))
         new_ants = rng.normal(centers, sigma)
-
         new_ants = np.clip(new_ants, lb, ub)
         new_values = np.array([fn_obj(ant) for ant in new_ants], dtype=float)
 
@@ -63,8 +66,7 @@ def ACOSolver(
         values = values[best_indices].copy()
 
     best_index = np.argmin(values)
-
     return {
         "best position": archive[best_index].copy(),
-        "best value": values[best_index],
+        "best value": float(values[best_index]),
     }

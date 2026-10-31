@@ -2,11 +2,6 @@ import numpy as np
 
 
 def _penalty(x, threshold, scale=100.0, power=4):
-    """
-        Calculate a penalty for each component of x that exceeds the threshold. 
-        If all components are between -threshold and threshold, return zero.
-        Used for: F12 and F13
-    """
     outside = np.maximum(np.abs(x) - threshold, 0.0)
     return scale * np.sum(outside ** power)
 
@@ -30,6 +25,9 @@ def _shekel(x, count):
 
 
 def build_benchmarks(dim):
+    if dim < 1:
+        raise ValueError("dim must be at least 1")
+
     benchmarks = []
 
     def add(name, fn, lb, ub, dimensions=dim, minimum=0.0):
@@ -72,6 +70,7 @@ def build_benchmarks(dim):
         30.0,
     )
     add("F6 Step", lambda x: np.sum(np.floor(x + 0.5) ** 2), -100.0, 100.0)
+    # Use a deterministic quartic variant so repeated evaluations agree.
     add("F7 Quartic", lambda x: np.sum(np.arange(1, x.size + 1) * x ** 4), -128.0, 128.0)
     add(
         "F8 Schwefel 2.26",
@@ -152,8 +151,8 @@ def build_benchmarks(dim):
             + x[0] * x[1]
             + (-4.0 + 4.0 * x[1] ** 2) * x[1] ** 2
         ),
-        -5.0,
-        5.0,
+        np.array([-3.0, -2.0]),
+        np.array([3.0, 2.0]),
         2,
         -1.0316285,
     )
