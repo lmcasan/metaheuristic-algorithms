@@ -1,10 +1,9 @@
 from pathlib import Path
-
+import matplotlib.pyplot as plt
 import numpy as np
 
 
 def make_qualitative_plots(benchmark, result, output_dir):
-    import matplotlib.pyplot as plt
 
     required = ("history", "trajectory", "average_fitness", "convergence")
     missing = [key for key in required if key not in result]
@@ -29,13 +28,13 @@ def make_qualitative_plots(benchmark, result, output_dir):
             trajectory[:, 0],
             np.zeros(trajectory.shape[0]),
         ))
-        y_label = "Sin coordenada"
+        y_label = "koordinatsız"
     else:
         points = history[:, :, :2].reshape(-1, 2)
         trajectory_points = trajectory[:, :2]
-        y_label = "Coordenada 2"
+        y_label = "Koordinat 2"
 
-    x_label = "Coordenada 1"
+    x_label = "Koordinat 1"
     iterations = np.repeat(np.arange(history.shape[0]), history.shape[1])
 
     figure, axis = plt.subplots()
@@ -46,9 +45,9 @@ def make_qualitative_plots(benchmark, result, output_dir):
         cmap="viridis",
         s=18,
     )
-    figure.colorbar(scatter, ax=axis, label="Iteración")
+    figure.colorbar(scatter, ax=axis, label="Iterasyon")
     axis.set(
-        title=f"Historial de búsqueda: {benchmark['name']}",
+        title=f"Arama Geçmisi: {benchmark['name']}",
         xlabel=x_label,
         ylabel=y_label,
     )
@@ -57,10 +56,10 @@ def make_qualitative_plots(benchmark, result, output_dir):
 
     figure, axis = plt.subplots()
     axis.plot(trajectory_points[:, 0], trajectory_points[:, 1], marker=".", markersize=3)
-    axis.scatter(trajectory_points[0, 0], trajectory_points[0, 1], label="Inicio")
-    axis.scatter(trajectory_points[-1, 0], trajectory_points[-1, 1], label="Final")
+    axis.scatter(trajectory_points[0, 0], trajectory_points[0, 1], label="başlangıç")
+    axis.scatter(trajectory_points[-1, 0], trajectory_points[-1, 1], label="son")
     axis.set(
-        title=f"Trayectoria del primer walrus: {benchmark['name']}",
+        title=f"Popülasyondaki ilk mors bireyinin yörüngesi: {benchmark['name']}",
         xlabel=x_label,
         ylabel=y_label,
     )
@@ -71,9 +70,9 @@ def make_qualitative_plots(benchmark, result, output_dir):
     figure, axis = plt.subplots()
     axis.plot(result["average_fitness"])
     axis.set(
-        title=f"Fitness promedio de la población: {benchmark['name']}",
-        xlabel="Iteración",
-        ylabel="Fitness promedio",
+        title=f"Uygunluk değeri: {benchmark['name']}",
+        xlabel="Iterasyon",
+        ylabel="En iyi uygunluk değeri",
     )
     figure.savefig(output_dir / "average_fitness.png", bbox_inches="tight")
     plt.close(figure)
@@ -81,9 +80,9 @@ def make_qualitative_plots(benchmark, result, output_dir):
     figure, axis = plt.subplots()
     axis.plot(result["convergence"])
     axis.set(
-        title=f"Convergencia de WO: {benchmark['name']}",
-        xlabel="Iteración",
-        ylabel="Mejor fitness",
+        title=f"WO yakınsama: {benchmark['name']}",
+        xlabel="Iterasyon",
+        ylabel="En iyi uygunluk değeri",
     )
     figure.savefig(output_dir / "convergence.png", bbox_inches="tight")
     plt.close(figure)
