@@ -24,11 +24,9 @@ def _shekel(x, count):
     return -np.sum(1.0 / (distances + constants[:count]))
 
 
-def build_benchmarks(dim):
-    if dim < 1:
-        raise ValueError("dim must be at least 1")
-
+def build_benchmarks(dim, seed=None):
     benchmarks = []
+    quartic_rng = np.random.default_rng(seed)
 
     def add(name, fn, lb, ub, dimensions=dim, minimum=0.0):
         index = len(benchmarks) + 1
@@ -70,8 +68,10 @@ def build_benchmarks(dim):
         30.0,
     )
     add("F6 Step", lambda x: np.sum(np.floor(x + 0.5) ** 2), -100.0, 100.0)
-    # Use a deterministic quartic variant so repeated evaluations agree.
-    add("F7 Quartic", lambda x: np.sum(np.arange(1, x.size + 1) * x ** 4), -128.0, 128.0)
+    def quartic(x):
+        return np.sum(np.arange(1, x.size + 1) * x ** 4) + quartic_rng.uniform(0.0, 1.0)
+
+    add("F7 Quartic", quartic, -128.0, 128.0)
     add(
         "F8 Schwefel 2.26",
         lambda x: -np.sum(x * np.sin(np.sqrt(np.abs(x)))),
@@ -136,7 +136,7 @@ def build_benchmarks(dim):
         0.1957, 0.1947, 0.1735, 0.16, 0.0844, 0.0627,
         0.0456, 0.0342, 0.0323, 0.0235, 0.0246,
     ])
-    kowalik_b = 1.0 / np.array([0.25, 0.5, 1.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0])
+    kowalik_b = np.array([0.25, 0.5, 1.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0])
 
     def kowalik(x):
         numerator = x[0] * (kowalik_b ** 2 + kowalik_b * x[1])
@@ -151,8 +151,8 @@ def build_benchmarks(dim):
             + x[0] * x[1]
             + (-4.0 + 4.0 * x[1] ** 2) * x[1] ** 2
         ),
-        np.array([-3.0, -2.0]),
-        np.array([3.0, 2.0]),
+        -5.0,
+        5.0,
         2,
         -1.0316285,
     )
@@ -166,7 +166,7 @@ def build_benchmarks(dim):
         t = 1.0 / (8.0 * np.pi)
         return a * (x[1] - b * x[0] ** 2 + c * x[0] - r) ** 2 + s * (1.0 - t) * np.cos(x[0]) + s
 
-    add("F17 Branin", branin, np.array([-5.0, 0.0]), np.array([10.0, 15.0]), 2, 0.397887)
+    add("F17 Branin", branin, -5.0, 5.0, 2, 0.397887)
 
     def goldstein_price(x):
         first = 1.0 + (x[0] + x[1] + 1.0) ** 2 * (
@@ -198,7 +198,7 @@ def build_benchmarks(dim):
     def hartmann3(x):
         return -np.sum(hartmann_alpha * np.exp(-np.sum(hartmann3_a * (x - hartmann3_p) ** 2, axis=1)))
 
-    add("F19 Hartmann 3D", hartmann3, 0.0, 1.0, 3, -3.86278)
+    add("F19 Hartmann 3D", hartmann3, -1.0, 2.0, 3, -3.86278)
 
     hartmann6_a = np.array([
         [10.0, 3.0, 17.0, 3.5, 1.7, 8.0],
